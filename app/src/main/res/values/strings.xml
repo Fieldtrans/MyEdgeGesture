@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">MyEdgeGesture</string>
+    <string-array name="gesture_action_labels">
+        <item>无动作</item>
+        <item>返回</item>
+        <item>主页</item>
+        <item>最近任务</item>
+        <item>单击屏幕</item>
+    </string-array>
+</resources>
