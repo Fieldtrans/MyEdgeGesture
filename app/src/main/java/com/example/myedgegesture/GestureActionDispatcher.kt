@@ -32,9 +32,40 @@ object GestureActionDispatcher {
         when (action) {
             GestureConfig.ACTION_BACK -> injectSystemKey(context, KeyEvent.KEYCODE_BACK, "back")
             GestureConfig.ACTION_HOME -> injectSystemKey(context, KeyEvent.KEYCODE_HOME, "home")
-            GestureConfig.ACTION_RECENTS -> injectSystemKey(context, KeyEvent.KEYCODE_APP_SWITCH, "recents")
+            GestureConfig.ACTION_RECENTS -> toggleRecents(context)
             GestureConfig.ACTION_ONE_HAND_TAP -> OneHandPointer.start(context, x, y, x, y)
             else -> DebugLog.info("no action mapped")
+        }
+    }
+
+    private fun toggleRecents(context: Context) {
+        if (toggleRecentsByStatusBar()) {
+            XposedBridge.log("EdgeGesture: action -> recents")
+            return
+        }
+
+        injectSystemKey(context, KeyEvent.KEYCODE_APP_SWITCH, "recents")
+    }
+
+    private fun toggleRecentsByStatusBar(): Boolean {
+        return try {
+            val service = Class.forName("android.os.ServiceManager")
+                .getMethod("getService", String::class.java)
+                .invoke(null, "statusbar")
+                ?: return false
+            val stubClass = Class.forName("com.android.internal.statusbar.IStatusBarService\$Stub")
+            val serviceInterface = stubClass.getMethod("asInterface", android.os.IBinder::class.java)
+                .invoke(null, service)
+            val method = serviceInterface.javaClass.methods.firstOrNull { it.name == "toggleRecentApps" }
+                ?: return false
+
+            InputInjectionGuard.runIgnoring {
+                method.invoke(serviceInterface)
+            }
+            true
+        } catch (t: Throwable) {
+            XposedBridge.log("EdgeGesture: toggleRecents failed: ${t.message}")
+            false
         }
     }
 

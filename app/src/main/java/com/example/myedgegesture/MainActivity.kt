@@ -163,8 +163,9 @@ class MainActivity : ComponentActivity() {
             GestureConfig.edges.forEach { edge ->
                 GestureConfig.gestures.forEach { gesture ->
                     val key = GestureConfig.actionKey(edge, gesture)
-                    put(key, prefs.getString(key, GestureConfig.defaultAction(edge, gesture))
-                        ?: GestureConfig.defaultAction(edge, gesture))
+                    val savedAction = prefs.getString(key, GestureConfig.defaultAction(edge, gesture))
+                        ?: GestureConfig.defaultAction(edge, gesture)
+                    put(key, GestureConfig.sanitizeAction(gesture, savedAction))
                 }
             }
         }
@@ -339,7 +340,7 @@ class MainActivity : ComponentActivity() {
             .putInt(GestureConfig.KEY_POINTER_COLOR_BLUE, state.pointerColorBlue)
 
         state.actionByKey.forEach { (key, value) ->
-            editor.putString(key, value)
+            editor.putString(key, GestureConfig.sanitizeActionKey(key, value))
         }
     }
 
@@ -496,8 +497,11 @@ private data class SettingsState(
                         val imported = actionsJson?.optString(key).orEmpty()
                         put(
                             key,
-                            imported.takeIf { it in GestureConfig.actionValues }
-                                ?: GestureConfig.defaultAction(edge, gesture)
+                            GestureConfig.sanitizeAction(
+                                gesture,
+                                imported.takeIf { it in GestureConfig.actionValues }
+                                    ?: GestureConfig.defaultAction(edge, gesture)
+                            )
                         )
                     }
                 }
@@ -1206,6 +1210,7 @@ private fun ActionPage(
             val key = GestureConfig.actionKey(selectedEdge, gesture)
             ActionDropdownRow(
                 title = gestureLabel(gesture),
+                gesture = gesture,
                 selectedAction = settings.actionByKey[key] ?: GestureConfig.defaultAction(selectedEdge, gesture),
                 onActionSelected = { action ->
                     onSettingsChange(settings.copy(actionByKey = settings.actionByKey + (key to action)))
@@ -1370,10 +1375,13 @@ private fun ColorSwatch(color: Color) {
 @Composable
 private fun ActionDropdownRow(
     title: String,
+    gesture: String,
     selectedAction: String,
     onActionSelected: (String) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
+    val actions = actionValuesForGesture(gesture)
+    val displayAction = selectedAction.takeIf { it in actions } ?: GestureConfig.ACTION_NONE
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -1384,7 +1392,7 @@ private fun ActionDropdownRow(
         Text(title, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
         Box {
             OutlinedButton(onClick = { expanded = true }) {
-                Text(actionLabel(selectedAction))
+                Text(actionLabel(displayAction))
                 Spacer(Modifier.width(6.dp))
                 Icon(Icons.Rounded.ExpandMore, contentDescription = null)
             }
@@ -1392,7 +1400,7 @@ private fun ActionDropdownRow(
                 expanded = expanded,
                 onDismissRequest = { expanded = false }
             ) {
-                GestureConfig.actionValues.forEach { action ->
+                actions.forEach { action ->
                     DropdownMenuItem(
                         text = { Text(actionLabel(action)) },
                         onClick = {
@@ -1612,4 +1620,8 @@ private fun actionLabel(action: String): String {
         GestureConfig.ACTION_RECENTS -> t("最近任务", "Recents")
         else -> action
     }
+}
+
+private fun actionValuesForGesture(gesture: String): List<String> {
+    return GestureConfig.actionValuesForGesture(gesture)
 }

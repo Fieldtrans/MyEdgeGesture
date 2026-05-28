@@ -41,10 +41,22 @@ class EdgeGestureDetector(
         val thresholdPx: Float,
         val createdAt: Long,
         var claimed: Boolean = false,
-        var yielded: Boolean = false
+        var yielded: Boolean = false,
+        var actionDispatched: Boolean = false
+    )
+
+    private data class PendingDoubleTap(
+        val edge: Edge,
+        val zone: String,
+        val downX: Float,
+        val downY: Float,
+        val x: Float,
+        val y: Float,
+        val eventTime: Long
     )
 
     private var session: Session? = null
+    private var pendingDoubleTap: PendingDoubleTap? = null
 
     fun handle(context: Context, event: MotionEvent): Decision {
         return when (event.actionMasked) {
@@ -54,7 +66,7 @@ class EdgeGestureDetector(
                 Decision.REPLAY_HELD_THEN_FORWARD
             }
             MotionEvent.ACTION_MOVE -> handleMove(context, event)
-            MotionEvent.ACTION_UP -> handleUp()
+            MotionEvent.ACTION_UP -> handleUp(context, event)
             MotionEvent.ACTION_CANCEL -> handleCancel()
             else -> if (session?.claimed == true) Decision.CONSUME else Decision.FORWARD
         }
@@ -62,6 +74,7 @@ class EdgeGestureDetector(
 
     fun reset() {
         session = null
+        pendingDoubleTap = null
     }
 
     private fun handleDown(context: Context, event: MotionEvent): Decision {
@@ -81,11 +94,13 @@ class EdgeGestureDetector(
         val edge = resolveEdge(bounds.first, bounds.second, edgeWidth, event.rawX, event.rawY)
         if (edge == null || !isInsideTriggerRegion(bounds.first, bounds.second, edge, event.rawX, event.rawY)) {
             session = null
+            clearExpiredDoubleTap(event.eventTime)
             return Decision.FORWARD
         }
 
-        if (!hasOneHandSwipeUpActionForEdge(edge)) {
+        if (!hasSwipeUpActionForEdge(edge) && !hasDoubleTapRecentsForEdge(edge)) {
             session = null
+            clearExpiredDoubleTap(event.eventTime)
             return Decision.FORWARD
         }
 
@@ -121,17 +136,24 @@ class EdgeGestureDetector(
 
         if (isConfirmedSwipeUp(dx, dy, current.thresholdPx)) {
             current.claimed = true
+            pendingDoubleTap = null
             DebugLog.info("claim pointer swipe edge=${current.edge} dx=$dx dy=$dy")
-            callbacks.onGesture(
-                context = context,
-                edge = current.edge,
-                zone = current.zone,
-                gesture = "swipe_up",
-                startX = current.downX,
-                startY = current.downY,
-                x = event.rawX,
-                y = event.rawY
-            )
+
+            if (shouldDispatchImmediately(current.edge)) {
+                current.actionDispatched = true
+                callbacks.onGesture(
+                    context = context,
+                    edge = current.edge,
+                    zone = current.zone,
+                    gesture = "swipe_up",
+                    startX = current.downX,
+                    startY = current.downY,
+                    x = event.rawX,
+                    y = event.rawY
+                )
+            } else {
+                DebugLog.info("defer swipe action until touch up edge=${current.edge}")
+            }
             return Decision.DROP_HELD_AND_CONSUME
         }
 
@@ -144,10 +166,28 @@ class EdgeGestureDetector(
         return Decision.HOLD
     }
 
-    private fun handleUp(): Decision {
+    private fun handleUp(context: Context, event: MotionEvent): Decision {
         val current = session ?: return Decision.FORWARD
         session = null
-        return if (current.claimed) Decision.CONSUME else Decision.REPLAY_HELD_THEN_FORWARD
+        if (current.claimed && !current.actionDispatched) {
+            callbacks.onGesture(
+                context = context,
+                edge = current.edge,
+                zone = current.zone,
+                gesture = "swipe_up",
+                startX = current.downX,
+                startY = current.downY,
+                x = event.rawX,
+                y = event.rawY
+            )
+        }
+        if (current.claimed) return Decision.CONSUME
+
+        return if (handleDoubleTapRecents(context, current, event)) {
+            Decision.DROP_HELD_AND_CONSUME
+        } else {
+            Decision.REPLAY_HELD_THEN_FORWARD
+        }
     }
 
     private fun handleCancel(): Decision {
@@ -206,8 +246,86 @@ class EdgeGestureDetector(
         }
     }
 
-    private fun hasOneHandSwipeUpActionForEdge(edge: Edge): Boolean {
+    private fun hasSwipeUpActionForEdge(edge: Edge): Boolean {
+        return RuntimeGestureConfig.actionFor(edge, "swipe_up") != GestureConfig.ACTION_NONE
+    }
+
+    private fun hasDoubleTapRecentsForEdge(edge: Edge): Boolean {
+        return RuntimeGestureConfig.actionFor(edge, "double_click") == GestureConfig.ACTION_RECENTS
+    }
+
+    private fun shouldDispatchImmediately(edge: Edge): Boolean {
         return RuntimeGestureConfig.actionFor(edge, "swipe_up") == GestureConfig.ACTION_ONE_HAND_TAP
+    }
+
+    private fun handleDoubleTapRecents(
+        context: Context,
+        current: Session,
+        event: MotionEvent
+    ): Boolean {
+        if (!hasDoubleTapRecentsForEdge(current.edge)) {
+            clearExpiredDoubleTap(event.eventTime)
+            return false
+        }
+
+        val dx = event.rawX - current.downX
+        val dy = event.rawY - current.downY
+        val duration = event.eventTime - current.createdAt
+        val tapSlop = TAP_SLOP_DP * context.resources.displayMetrics.density
+        if (duration > TAP_MAX_HOLD_MS || abs(dx) > tapSlop || abs(dy) > tapSlop) {
+            pendingDoubleTap = null
+            return false
+        }
+
+        val pending = pendingDoubleTap
+        if (pending != null && isMatchingDoubleTap(context, pending, current, event)) {
+            pendingDoubleTap = null
+            callbacks.onGesture(
+                context = context,
+                edge = current.edge,
+                zone = current.zone,
+                gesture = "double_click",
+                startX = pending.downX,
+                startY = pending.downY,
+                x = event.rawX,
+                y = event.rawY
+            )
+            DebugLog.info("double tap recents edge=${current.edge}")
+        } else {
+            pendingDoubleTap = PendingDoubleTap(
+                edge = current.edge,
+                zone = current.zone,
+                downX = current.downX,
+                downY = current.downY,
+                x = event.rawX,
+                y = event.rawY,
+                eventTime = event.eventTime
+            )
+            DebugLog.info("double tap pending edge=${current.edge}")
+        }
+        return true
+    }
+
+    private fun isMatchingDoubleTap(
+        context: Context,
+        pending: PendingDoubleTap,
+        current: Session,
+        event: MotionEvent
+    ): Boolean {
+        if (pending.edge != current.edge || pending.zone != current.zone) return false
+        if (event.eventTime - pending.eventTime > DOUBLE_TAP_TIMEOUT_MS) return false
+
+        val slop = DOUBLE_TAP_SLOP_DP * context.resources.displayMetrics.density
+        val dx = event.rawX - pending.x
+        val dy = event.rawY - pending.y
+        return dx * dx + dy * dy <= slop * slop
+    }
+
+    private fun clearExpiredDoubleTap(eventTime: Long) {
+        val pending = pendingDoubleTap ?: return
+        if (eventTime - pending.eventTime > DOUBLE_TAP_TIMEOUT_MS) {
+            pendingDoubleTap = null
+        }
     }
 
     private fun isInsideTriggerRegion(width: Float, height: Float, edge: Edge, x: Float, y: Float): Boolean {
@@ -273,8 +391,12 @@ class EdgeGestureDetector(
     private companion object {
         const val MAX_HOLD_MS = 110L
         const val MAX_UP_HOLD_MS = 260L
+        const val TAP_MAX_HOLD_MS = 260L
+        const val DOUBLE_TAP_TIMEOUT_MS = 320L
         const val NATIVE_BACK_YIELD_SLOP_DP = 8f
         const val HORIZONTAL_YIELD_DISTANCE_DP = 6f
         const val POSSIBLE_UP_DISTANCE_DP = 10f
+        const val TAP_SLOP_DP = 14f
+        const val DOUBLE_TAP_SLOP_DP = 64f
     }
 }

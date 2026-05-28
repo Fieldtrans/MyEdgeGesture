@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.3 - 2026-05-29
+
+- Implemented actions currently available in this release:
+  - Edge swipe up: One-hand tap, Back, Home, or Recents.
+  - Edge double tap: Recents.
+- Removed unimplemented action rows from the action settings page.
+- Removed the top-edge action option; action settings now focus on left, right, and bottom edges.
+- Kept the gesture detector on the stable InputFilter-based path.
+
 ## 1.0.2 - 2026-05-29
 
 - Emergency hotfix release.

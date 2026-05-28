@@ -97,15 +97,10 @@ object GestureConfig {
         "Tracker + Cursor"
     )
 
-    val edges = listOf("left", "right", "top", "bottom")
+    val edges = listOf("left", "right", "bottom")
     val gestures = listOf(
-        "click",
         "double_click",
-        "long_press",
-        "swipe_up",
-        "swipe_down",
-        "swipe_left",
-        "swipe_right"
+        "swipe_up"
     )
     val actionValues = listOf(
         ACTION_NONE,
@@ -115,6 +110,14 @@ object GestureConfig {
         ACTION_RECENTS,
     )
     val actionLabels = listOf("无动作", "单手点击屏幕", "返回", "主页", "最近任务")
+
+    fun actionValuesForGesture(gesture: String): List<String> {
+        return when (gesture) {
+            "swipe_up" -> actionValues
+            "double_click" -> listOf(ACTION_NONE, ACTION_RECENTS)
+            else -> listOf(ACTION_NONE)
+        }
+    }
 
     fun actionKey(edge: String, gesture: String): String {
         return "action_${edge}_$gesture"
@@ -126,6 +129,15 @@ object GestureConfig {
         } else {
             ACTION_NONE
         }
+    }
+
+    fun sanitizeAction(gesture: String, action: String): String {
+        return action.takeIf { it in actionValuesForGesture(gesture) } ?: ACTION_NONE
+    }
+
+    fun sanitizeActionKey(key: String, action: String): String {
+        val gesture = gestures.firstOrNull { key.endsWith("_$it") } ?: return sanitizeAction("", action)
+        return sanitizeAction(gesture, action)
     }
 
     fun putConfigExtras(
@@ -191,7 +203,7 @@ object GestureConfig {
         intent.putExtra(KEY_POINTER_COLOR_GREEN, pointerColorGreen)
         intent.putExtra(KEY_POINTER_COLOR_BLUE, pointerColorBlue)
         actionByKey.forEach { (key, value) ->
-            intent.putExtra(key, value)
+            intent.putExtra(key, sanitizeActionKey(key, value))
         }
         return intent
     }

@@ -89,7 +89,7 @@ object RuntimeGestureConfig {
                 val key = GestureConfig.actionKey(edge, gesture)
                 val action = intent.getStringExtra(key)
                 if (action != null) {
-                    actionByKey[key] = action
+                    actionByKey[key] = GestureConfig.sanitizeAction(gesture, action)
                 }
             }
         }
@@ -134,8 +134,9 @@ object RuntimeGestureConfig {
         GestureConfig.edges.forEach { edge ->
             GestureConfig.gestures.forEach { gesture ->
                 val key = GestureConfig.actionKey(edge, gesture)
-                actionByKey[key] = prefs.getString(key, actionByKey[key])
+                val savedAction = prefs.getString(key, actionByKey[key])
                     ?: GestureConfig.defaultAction(edge, gesture)
+                actionByKey[key] = GestureConfig.sanitizeAction(gesture, savedAction)
             }
         }
     }
