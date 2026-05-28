@@ -16,7 +16,7 @@ One-handed edge gestures for LSPosed/Xposed. EdgeGesture helps you tap hard-to-r
   <img src="docs/screenshots/tracker-cursor.jpg" width="260" alt="Tracker and Cursor mode" />
 </p>
 
-[中文](#中文) | [Download APK](https://github.com/Fieldtrans/EdgeGesture/releases/latest) | [Install Guide](docs/INSTALL.zh-CN.md) | [Troubleshooting](docs/TROUBLESHOOTING.zh-CN.md)
+[中文](#中文) | [Download APK](https://github.com/Fieldtrans/EdgeGesture/releases/latest) | [Docs](docs/README.md) | [Install Guide](docs/INSTALL.zh-CN.md) | [Troubleshooting](docs/TROUBLESHOOTING.zh-CN.md)
 
 ## Highlights
 
@@ -96,7 +96,7 @@ EdgeGesture 是一个 LSPosed/Xposed 单手边缘手势模块，用来解决大�
 
 ![EdgeGesture 演示](docs/demo.gif)
 
-[下载 APK](https://github.com/Fieldtrans/EdgeGesture/releases/latest) | [安装指南](docs/INSTALL.zh-CN.md) | [排错指南](docs/TROUBLESHOOTING.zh-CN.md)
+[下载 APK](https://github.com/Fieldtrans/EdgeGesture/releases/latest) | [文档目录](docs/README.md) | [安装指南](docs/INSTALL.zh-CN.md) | [排错指南](docs/TROUBLESHOOTING.zh-CN.md)
 
 ## 功能亮点
 
