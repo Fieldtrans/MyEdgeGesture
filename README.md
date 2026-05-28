@@ -64,13 +64,6 @@ app/build/outputs/apk/release/app-release.apk
 
 For easier local testing and upgrade compatibility with test builds, the current release build uses the debug signing configuration.
 
-## Roadmap
-
-- Improve real-device demo GIFs and screenshots.
-- Add more action types beyond tap and notification shade.
-- Add more preset profiles for different screen sizes.
-- Continue tuning gesture feel for high-refresh-rate phones.
-
 ## Status
 
 Current version: `1.0`.
@@ -146,13 +139,6 @@ app/build/outputs/apk/release/app-release.apk
 ```
 
 为了方便本地测试和覆盖安装当前测试包，release 构建暂时使用 debug 签名配置。
-
-## 后续计划
-
-- 补充真实手机录屏 GIF 和截图。
-- 增加更多动作类型。
-- 增加不同屏幕尺寸的预设配置。
-- 继续优化高刷新率手机上的动画手感。
 
 ## 当前状态
 
