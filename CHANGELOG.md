@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.2 - 2026-05-29
+
+- Emergency hotfix release.
+- Restored the stable v1.0.1 input handling path.
+- Removed the experimental all-action gesture detector build from the release path because it could cause high `system_server` CPU usage on real devices.
+
 ## 1.0.1 - 2026-05-28
 
 - Added GPL-3.0 license.
