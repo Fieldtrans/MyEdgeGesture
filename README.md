@@ -4,6 +4,11 @@ One-handed edge gestures for LSPosed/Xposed. EdgeGesture helps you tap hard-to-r
 
 ![EdgeGesture demo](docs/demo.gif)
 
+<p align="center">
+  <img src="docs/screenshots/line-pointer.jpg" width="260" alt="Line pointer mode" />
+  <img src="docs/screenshots/tracker-cursor.jpg" width="260" alt="Tracker and Cursor mode" />
+</p>
+
 [中文](#中文) | [Download APK](https://github.com/Fieldtrans/EdgeGesture/releases/latest)
 
 ## Highlights
