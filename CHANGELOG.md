@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.4 - 2026-05-29
+
+- Removed the bottom-edge action option to avoid conflict with Android system Home/Recents gestures.
+- Action settings now focus on left and right edges only.
+
 ## 1.0.3 - 2026-05-29
 
 - Implemented actions currently available in this release:

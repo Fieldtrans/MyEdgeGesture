@@ -97,7 +97,7 @@ object GestureConfig {
         "Tracker + Cursor"
     )
 
-    val edges = listOf("left", "right", "bottom")
+    val edges = listOf("left", "right")
     val gestures = listOf(
         "double_click",
         "swipe_up"

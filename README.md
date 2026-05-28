@@ -80,7 +80,7 @@ For easier local testing and upgrade compatibility with test builds, the current
 
 ## Status
 
-Current version: `1.0.3`.
+Current version: `1.0.4`.
 
 This module hooks input handling inside `system_server`. Use it carefully and keep a working recovery path before testing custom builds.
 
@@ -160,7 +160,7 @@ app/build/outputs/apk/release/app-release.apk
 
 ## 当前状态
 
-当前版本：`1.0.3`。
+当前版本：`1.0.4`。
 
 该模块会 hook `system_server` 的输入处理逻辑，请谨慎使用，并在测试自定义版本前保留可恢复手段。
 
