@@ -1,5 +1,12 @@
 # EdgeGesture
 
+[![Release](https://img.shields.io/github/v/release/Fieldtrans/EdgeGesture?label=release)](https://github.com/Fieldtrans/EdgeGesture/releases/latest)
+[![Android CI](https://github.com/Fieldtrans/EdgeGesture/actions/workflows/android.yml/badge.svg)](https://github.com/Fieldtrans/EdgeGesture/actions/workflows/android.yml)
+[![Downloads](https://img.shields.io/github/downloads/Fieldtrans/EdgeGesture/total?label=downloads)](https://github.com/Fieldtrans/EdgeGesture/releases)
+[![Android](https://img.shields.io/badge/Android-16%2B-3DDC84?logo=android&logoColor=white)](https://developer.android.com/)
+[![LSPosed](https://img.shields.io/badge/LSPosed-module-6f42c1)](https://github.com/LSPosed/LSPosed)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
+
 One-handed edge gestures for LSPosed/Xposed. EdgeGesture helps you tap hard-to-reach areas of the screen with a right-edge gesture, including a line pointer mode and a Tracker + Cursor mode.
 
 ![EdgeGesture demo](docs/demo.gif)
@@ -9,7 +16,7 @@ One-handed edge gestures for LSPosed/Xposed. EdgeGesture helps you tap hard-to-r
   <img src="docs/screenshots/tracker-cursor.jpg" width="260" alt="Tracker and Cursor mode" />
 </p>
 
-[中文](#中文) | [Download APK](https://github.com/Fieldtrans/EdgeGesture/releases/latest)
+[中文](#中文) | [Download APK](https://github.com/Fieldtrans/EdgeGesture/releases/latest) | [Install Guide](docs/INSTALL.zh-CN.md) | [Troubleshooting](docs/TROUBLESHOOTING.zh-CN.md)
 
 ## Highlights
 
@@ -38,6 +45,8 @@ One-handed edge gestures for LSPosed/Xposed. EdgeGesture helps you tap hard-to-r
 6. Open EdgeGesture and enable the gesture mode you want.
 
 If gestures do not respond, open LSPosed logs and search for `EdgeGesture`.
+
+For detailed setup and troubleshooting, see [安装指南](docs/INSTALL.zh-CN.md) and [排错指南](docs/TROUBLESHOOTING.zh-CN.md).
 
 ## How It Works
 
@@ -75,6 +84,8 @@ Current version: `1.0`.
 
 This module hooks input handling inside `system_server`. Use it carefully and keep a working recovery path before testing custom builds.
 
+License: [GPL-3.0](LICENSE).
+
 ## Contributors
 
 See [CONTRIBUTORS.md](CONTRIBUTORS.md).
@@ -85,7 +96,7 @@ EdgeGesture 是一个 LSPosed/Xposed 单手边缘手势模块，用来解决大�
 
 ![EdgeGesture 演示](docs/demo.gif)
 
-[下载 APK](https://github.com/Fieldtrans/EdgeGesture/releases/latest)
+[下载 APK](https://github.com/Fieldtrans/EdgeGesture/releases/latest) | [安装指南](docs/INSTALL.zh-CN.md) | [排错指南](docs/TROUBLESHOOTING.zh-CN.md)
 
 ## 功能亮点
 
@@ -114,6 +125,8 @@ EdgeGesture 是一个 LSPosed/Xposed 单手边缘手势模块，用来解决大�
 6. 打开 EdgeGesture，启用你需要的手势模式。
 
 如果手势没有反应，请在 LSPosed 日志中搜索 `EdgeGesture`。
+
+更详细的步骤见 [安装指南](docs/INSTALL.zh-CN.md) 和 [排错指南](docs/TROUBLESHOOTING.zh-CN.md)。
 
 ## 工作原理
 
@@ -150,6 +163,8 @@ app/build/outputs/apk/release/app-release.apk
 当前版本：`1.0`。
 
 该模块会 hook `system_server` 的输入处理逻辑，请谨慎使用，并在测试自定义版本前保留可恢复手段。
+
+开源协议：[GPL-3.0](LICENSE)。
 
 ## 贡献者
 
