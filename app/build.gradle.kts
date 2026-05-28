@@ -1,8 +1,32 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
 }
+
+val signingProperties = Properties().apply {
+    val file = rootProject.file("signing.properties")
+    if (file.exists()) {
+        file.inputStream().use(::load)
+    }
+}
+
+val normalizedSigningProperties = signingProperties.entries.associate { (key, value) ->
+    key.toString()
+        .removePrefix("\uFEFF")
+        .removePrefix("\u00EF\u00BB\u00BF") to value.toString()
+}
+
+fun signingProperty(name: String): String? =
+    normalizedSigningProperties[name] ?: System.getenv(name)
+
+val releaseStoreFile = signingProperty("EDGEGESTURE_STORE_FILE")?.let(rootProject::file)
+val hasReleaseSigning = releaseStoreFile?.exists() == true &&
+        signingProperty("EDGEGESTURE_STORE_PASSWORD") != null &&
+        signingProperty("EDGEGESTURE_KEY_ALIAS") != null &&
+        signingProperty("EDGEGESTURE_KEY_PASSWORD") != null
 
 android {
     namespace = "com.example.myedgegesture"
@@ -14,15 +38,30 @@ android {
         applicationId = "com.example.myedgegesture"
         minSdk = 36
         targetSdk = 36
-        versionCode = 7
-        versionName = "1.0"
+        versionCode = 8
+        versionName = "1.0.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        if (hasReleaseSigning) {
+            create("releaseLocal") {
+                storeFile = releaseStoreFile
+                storePassword = signingProperty("EDGEGESTURE_STORE_PASSWORD")
+                keyAlias = signingProperty("EDGEGESTURE_KEY_ALIAS")
+                keyPassword = signingProperty("EDGEGESTURE_KEY_PASSWORD")
+            }
+        }
+    }
+
     buildTypes {
         release {
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = if (hasReleaseSigning) {
+                signingConfigs.getByName("releaseLocal")
+            } else {
+                signingConfigs.getByName("debug")
+            }
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(

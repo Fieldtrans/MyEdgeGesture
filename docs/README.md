@@ -2,6 +2,7 @@
 
 - [安装指南](INSTALL.zh-CN.md)
 - [排错指南](TROUBLESHOOTING.zh-CN.md)
+- [发布流程](RELEASE.zh-CN.md)
 
 Media:
 

@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.1 - 2026-05-28
+
+- Added GPL-3.0 license.
+- Added GitHub Actions release APK build.
+- Added install and troubleshooting documentation.
+- Added real-device screenshots to the project page.
+- Removed non-download demo GIF from GitHub Release assets.
+- Added local release signing support through ignored `signing.properties`.
+
 ## 1.0 - 2026-05-28
 
 - Renamed the project to EdgeGesture.
