@@ -1,5 +1,7 @@
 # EdgeGesture
 
+![EdgeGesture demo](docs/demo.gif)
+
 [中文](#中文) | [English](#english)
 
 ## 中文
